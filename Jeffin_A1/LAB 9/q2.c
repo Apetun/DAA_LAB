@@ -1,9 +1,11 @@
 #include <stdio.h>
 #include <stdlib.h>
+#include <string.h>
 
 typedef struct hash
-{	int value;
-	struct hash* nvalue;
+{
+	char str[20];
+	struct hash* next;
 }hash;
 
 int opcount = 0;
@@ -13,58 +15,57 @@ void createhash(hash* openhash[],int m)
 	for(int i=0; i<m;i++)
 	{
 		hash* temp = (hash*)malloc(sizeof(hash));
-		temp->value = 0;
-		temp->nvalue = NULL;
+		temp->next = NULL;
 		openhash[i]= temp;
 	}
 }
 
 
-void addvalue(int arr[],hash* openhash[],int m,int n)
+void addvalue(int arr[],char val[][20],hash* openhash[],int m,int n)
 {
+
 	for(int i= 0;i<n;i++)
 	{
+		
 		int key = arr[i]%m;
 		hash* curr = openhash[key];
-		while(curr->nvalue!=NULL)
+		while(curr->next != NULL)
 		{
-			curr = curr->nvalue;
+			curr= curr->next;
 		}
-		curr->value = arr[i];
-		hash* temp = (hash*) malloc(sizeof(hash));
-		temp->value = 0;
-		temp->nvalue = NULL;
-		curr->nvalue = temp;
+		strcpy(curr->str,val[i]);
+		hash* temp = (hash*)malloc(sizeof(hash));
+		temp->next = NULL;
+		curr->next = temp;
 
 	}
 }
 
 void printhash(hash* openhash[],int m)
 {
-	for(int i =0;i<m;i++)
+	for(int i = 0;i<m;i++)
 	{
 		hash* curr = openhash[i];
-		while(curr->nvalue)
-		{
-			printf("%d ->",curr->value);
-			curr=curr->nvalue;
+		while(curr->next!=NULL)
+		{printf("%s ->",curr->str);
+		curr=curr->next;
 		}
 		printf("\n");
 	}
 }
 
-void search(hash* openhash[],int value,int m)
-{
-	hash* curr = openhash[value%m];
+void search(hash* openhash[],char value[],int ascii,int m)
+{	int key= ascii%m;
+	hash* curr = openhash[key];
 	opcount++;
-
-	while(curr->value != value && curr->nvalue)
+	int i =0;
+	while(strcmp(curr->str,value)!=0 && curr!=NULL)
 	{
-		curr=curr->nvalue;
+		curr=curr->next;
 		opcount++;
 	}
 
-	if(curr)
+	if(strcmp(curr->str,value)==0)
 	{
 		printf("value found");
 	}
@@ -77,6 +78,27 @@ void search(hash* openhash[],int value,int m)
 
 }
 
+
+void tochar(int arr[],char val[][20],int n)
+{
+	for(int i=0;i<n;i++)
+	{	
+		int j=0;
+		char ch = val[i][0];
+		int sum = 0;
+		while(ch!='\0')
+		{
+			sum+=(int)ch;
+			j++;
+			ch = val[i][j];
+		}
+
+		arr[i]=sum;
+	}
+		
+}
+
+
 int main(){
 	int n,m;
 	printf("Enter the value of n:");
@@ -86,16 +108,39 @@ int main(){
 	hash* openhash[m];
 	createhash(openhash,m);
 	int arr[n];
+	char val[n][20];
 	printf("Enter the values:");
 	for(int i=0;i<n;i++)
 	{	
-		scanf("%d",&arr[i]);
+		scanf(" %s",&val[i][0]);
 	}
-	addvalue(arr,openhash,m,n);
+
+	tochar(arr,val,n);
+
+	printf("The ascii value array:");
+	for(int i=0;i<n;i++)
+	{	
+		printf("%d ->",arr[i]);
+	}
+
+
+	addvalue(arr,val,openhash,m,n);
 	printhash(openhash,m);
-	int value;
-	printf("Enter the value to be searched:");
-	scanf("%d",&value);
-	search(openhash,value,m);
+	char value[20];
+	printf("\nEnter the value to be searched:");
+	scanf(" %s",value);
+
+	int j=0;
+		char ch = value[j];
+		int ascii = 0;
+		while(ch!='\0')
+		{
+			ascii+=(int)ch;
+			j++;
+			ch = value[j];
+		}
+
+
+	search(openhash,value,ascii,m);
 	return 0;
 }
